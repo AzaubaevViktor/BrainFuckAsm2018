@@ -1,0 +1,44 @@
+Стековая машина
+Сначала -- 1 байт
+Три ленты:
+	Регистры
+	Динамические переменные
+	Стек состояний ?
+
+0 0 0 0 0 0 0 0 0 0 0 0
+ 1 x 1 y 1 z 0 0 0 0 0 0
+
+r -- registers
+d -- dynamic
+
+Registers:
+[<A> <B> <Res> <Carry> <cOmparsionresult> <memIn> <memOut> <memPtr> <Functionret> <userR1> <userR2> ... <userRN>] [<arg1> <arg2> <arg3> ... <A> ... <userRM>] [] [] ... []
+					                                        | глубина стека вызовов
+			| аргументы вызова                        | кадр стека
+операции:
+reg <name>
+unreg <name>
+mov <from> <to>, так даже проще имхо
+
+реализуются компилятором (с использованием информации namespace):
+gotoRegs (в начало текущего кадра стека)
+gotoNul
+gotoReg <name>
+
+Операции с памятью
+push // *P = O
+load // I = *P
+
+операции, которые работают с A, B, Res, Carry (реализуются в языке)
+add
+dif
+mul
+div
+mod
+сравнения!
+
+
+
+
+
+
