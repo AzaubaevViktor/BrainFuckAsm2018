@@ -11,3 +11,4 @@ if __name__ == "__main__":
             lines = f.readlines()
             c = Compiler(lines)
             print(c.lines)
+            print(c.root_block.beauty_str())
