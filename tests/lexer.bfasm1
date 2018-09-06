@@ -1,0 +1,22 @@
+#[stage lexer]
+# this is comment for compiler
+#this is simple comment
+
+func a b c
+
+fonc   a     b       c
+a b c d
+if a b c            d
+
+
+
+    f x y z
+
+    z a
+        b c d
+        e f g
+
+    x y
+        z a
+
+piu from to
