@@ -7,10 +7,17 @@ class Block(Line):
     def __init__(self, parent: Union["Block", None], line: Line):
         self.parent = parent
         self.line = line
-        self.inside: List[Block] = []
+        self.inside: List[Line] = []
 
-    def append(self, block: "Block"):
+    @property
+    def is_inside(self):
+        return bool(self.inside)
+
+    def append(self, block: "Line"):
         self.inside.append(block)
+
+    def pop(self)-> Line:
+        return self.inside.pop()
 
     @property
     def level(self):
@@ -31,7 +38,7 @@ class Block(Line):
     def beauty_str(self, indent=None):
         indent = indent or self.level
         i = "    " * indent
-        s = f"{i}{self.func} {' '.join(self.args)}\n"
+        s = f"{i}{self.func} {' '.join(map(str, self.args))}\n"
         for block in self.inside:
             s += block.beauty_str(indent + 1)
         return s

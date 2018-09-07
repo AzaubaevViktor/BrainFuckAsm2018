@@ -1,2 +1,2 @@
 from .lexer import Lexer
-from .line import Line
+from .line import Line, Token
