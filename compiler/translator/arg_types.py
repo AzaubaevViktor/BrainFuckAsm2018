@@ -1,7 +1,6 @@
-from typing import Any
-
 from ..lexer import Token
 from ..error import CompileError
+from .namespace import NameSpace
 
 
 class TType:
@@ -9,33 +8,42 @@ class TType:
 
 
 class TNum(TType):
-    def __init__(self, raw: Token):
-        self.raw = raw
+    def __init__(self, ns: NameSpace, token: Token):
+        self.ns = ns
+        self.token = token
         self.value = None
         self._check()
 
     def _check(self):
         try:
-            self.value = int(self.raw)
+            self.value = int(self.token)
         except ValueError:
             raise CompileError("translator", None, f"`{self.raw}` не является числом.")
 
 
 class TAddress(TType):
-    def __init__(self, raw: str):
-        self.raw = raw
+    def __init__(self, ns: NameSpace, token: Token):
+        self.ns = ns
+        self.token = token
         self.addr = None
         self._check()
 
     def _check(self):
-        success = False
+        text = self.token.text
 
         try:
-            if self.raw[0] == ":":
-                self.addr = int(self.raw[1:])
-                success = True
+            if text.startswith(":"):
+                self.addr = int(text[1:])
+                return
         except ValueError:
             pass
 
-        if not success:
-            raise CompileError(None, None, None, f"`{self.raw}` не является адресом. Правильный формат: `:<int>`")
+        try:
+            self.addr = self.ns.get_register_address(self.token)
+            return
+        except CompileError:
+            pass
+
+        raise CompileError(
+            "translator", self.token,
+            f"`{self.token}` не является адресом. Правильный формат: `:<int>` или имя регистра")

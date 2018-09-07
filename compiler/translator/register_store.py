@@ -1,5 +1,6 @@
 from typing import List, Dict, Iterable
 
+from ..lexer import Token
 from ..error import CompileError
 
 
@@ -26,11 +27,13 @@ class RegisterStore:
         for addr in last_frame.values():
             self.busy_cells.remove(addr // 2)
 
-    def get(self, name: str):
+    def get(self, token: Token) -> int:
+        name = token.text
+
         for frame in self.stack_frames[::-1]:
             if name in frame:
                 return frame[name]
 
-        raise CompileError(None, None, None, f"Register `{name}` not found!")
+        raise CompileError("translator", token, f"Register `{name}` not found!")
 
 
