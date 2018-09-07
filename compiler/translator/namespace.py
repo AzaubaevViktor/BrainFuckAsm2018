@@ -18,10 +18,14 @@ class NameSpace:
 
     def _init_functions(self):
         if self.parent is None:
-            from .func import BfAdd, BfMov
+            from .func import BfAdd, BfMov, BfPrint, BfRead, BfCycleOp, BfCycleCl
             self.functions = {
                 'bf_add': BfAdd,
-                'bf_mov': BfMov
+                'bf_mov': BfMov,
+                "bf_print": BfPrint,
+                "bf_read": BfRead,
+                "bf_cycle_op": BfCycleOp,
+                "bf_cycle_cl": BfCycleCl,
             }
 
     def get_func(self, token: Token) -> Type:

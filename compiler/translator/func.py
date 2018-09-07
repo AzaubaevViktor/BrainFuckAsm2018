@@ -62,3 +62,37 @@ class BfMov(BuiltinFunction):
             return ">" * (to - fr)
         else:
             return ""
+
+
+class BfPrint(BuiltinFunction):
+    NAME = "bf_print"
+    ARGS = ()
+
+    def _build(self, args):
+        return "."
+
+
+class BfRead(BuiltinFunction):
+    NAME = "bf_read"
+    ARGS = ()
+
+    def _build(self, args):
+        return ","
+
+
+class BfCycleOp(BuiltinFunction):
+    NAME = "bf_cycle_op"
+    ARGS = ()
+
+    def _build(self, args):
+        return "["
+
+
+class BfCycleCl(BuiltinFunction):
+    NAME = "bf_cycle_cl"
+    ARGS = ()
+
+    def _build(self, args):
+        return "]"
+
+
