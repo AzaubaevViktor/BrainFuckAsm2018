@@ -26,17 +26,18 @@ class Line:
 
         spaces = len(data) - len(data.lstrip())
         if spaces % 4 != 0:
-            raise CompileError('lexer', self, spaces - 1, "Количество пробелов не кратно 4м")
+            raise CompileError('lexer', self, "Количество пробелов не кратно 4м", pos=spaces - 1)
 
         self.level = spaces // 4
 
         data = data.strip()
 
-        self.is_comment = False
-        if data and data[0] == "#":
-            self.is_comment = True
+        data, *self.comment = data.split("#")
+        self.comment = " ".join(self.comment)
+        if self.comment:
+            self.comment = self.comment[1:]
 
-        args = self.tokenize()
+        args = self.tokenize(data)
 
         self.func: Token = args[0] if args else None
         self.args: List[Token] = args[1:]
@@ -50,11 +51,11 @@ class Line:
     def __repr__(self):
         return str(self)
 
-    def tokenize(self):
+    def tokenize(self, data):
         tokens = []
         cur = ""
         pos = 0
-        for i, c in enumerate(self.raw):  # type: int, str
+        for i, c in enumerate(data):  # type: int, str
             if not c.isspace():
                 if not cur:
                     pos = i

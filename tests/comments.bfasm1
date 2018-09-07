@@ -1,0 +1,11 @@
+# this is comment
+#this is comment
+bf_add 100 # and this is comment
+
+# this doesn't work:
+#bf_mov :3 :0
+#     bf_mov :0 :3
+
+bf_add -5
+
+# comment!

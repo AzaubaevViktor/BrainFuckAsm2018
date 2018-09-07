@@ -17,8 +17,6 @@ class Translator:
         code = ""
         for line in lines:
             if isinstance(line, Line):
-                if line.is_comment:
-                    continue
                 Func: Type[BuiltinFunction] = ns.get_func(line.func)
                 func = Func(ns, line.args)
                 code += func.build()
