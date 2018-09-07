@@ -7,3 +7,9 @@ reg Y
 bf_mov Y :0
 bf_add 5
 bf_mov :0 Y
+
+unreg Y
+reg Z
+bf_mov Z :0
+bf_add 5
+bf_mov :0 Z

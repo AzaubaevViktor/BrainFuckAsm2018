@@ -18,8 +18,8 @@ class RegisterStore:
         while True:
             if addr not in self.busy_cells:
                 self.busy_cells.append(addr)
-                return addr * 2
-            addr += 1
+                return addr
+            addr += 2
 
     @property
     def _last_frame(self):
@@ -32,7 +32,7 @@ class RegisterStore:
     def delete_frame(self):
         last_frame = self.stack_frames.pop()
         for addr in last_frame.values():
-            self.busy_cells.remove(addr // 2)
+            self.busy_cells.remove(addr)
 
     def get(self, token: Token) -> int:
         name = token.text
@@ -48,6 +48,14 @@ class RegisterStore:
         if name in self._last_frame:
             raise CompileError("translator", token, f"Register {name} already exist")
         self._last_frame[name] = self._free_cell()
+
+    def delete(self, token: Token):
+        name = token.text
+        if name not in self._last_frame:
+            raise CompileError("translator", token, f"Register {name} doesn't exist")
+        addr = self._last_frame[name]
+        del self._last_frame[name]
+        self.busy_cells.remove(addr)
 
 
 

@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 from ..error import CompileError
 from ..lexer import Token
-from .arg_types import TType, TNum, TAddress, TString
+from .arg_types import TType, TNum, TAddress, TString, TRegister
 from .namespace import NameSpace
 
 
@@ -105,6 +105,15 @@ class Reg(BuiltinFunction):
         self.ns.create_register(token)
         return ""
 
+
+class UnReg(BuiltinFunction):
+    NAME = "unreg"
+    ARGS = (TRegister, )
+
+    def _build(self, args: Tuple[TRegister]):
+        token = args[0].token
+        self.ns.delete_register(token)
+        return ""
 
 "unreg"
 
