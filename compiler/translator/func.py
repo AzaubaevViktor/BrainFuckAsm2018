@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 from ..error import CompileError
 from ..lexer import Token
-from .arg_types import TType, TNum, TAddress
+from .arg_types import TType, TNum, TAddress, TString
 from .namespace import NameSpace
 
 
@@ -53,8 +53,8 @@ class BfMov(BuiltinFunction):
     ARGS = (TAddress, TAddress)
 
     def _build(self, args: Tuple[TAddress, TAddress]):
-        to = args[0].addr
-        fr = args[1].addr
+        to = args[0].value
+        fr = args[1].value
 
         if to < fr:
             return "<" * (fr - to)
@@ -96,3 +96,21 @@ class BfCycleCl(BuiltinFunction):
         return "]"
 
 
+class Reg(BuiltinFunction):
+    NAME = "reg"
+    ARGS = (TString, )
+
+    def _build(self, args: Tuple[TString]):
+        token = args[0].token
+        self.ns.create_register(token)
+        return ""
+
+
+"unreg"
+
+"clear_frame"  # очистит текущий кадр стека
+
+"macro"
+"macroblock"
+"reg_macro"  # регистрирует переменную с уникальным именем
+"include"  # подключает файл

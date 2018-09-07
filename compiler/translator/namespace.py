@@ -18,7 +18,7 @@ class NameSpace:
 
     def _init_functions(self):
         if self.parent is None:
-            from .func import BfAdd, BfMov, BfPrint, BfRead, BfCycleOp, BfCycleCl
+            from .func import BfAdd, BfMov, BfPrint, BfRead, BfCycleOp, BfCycleCl, Reg
             self.functions = {
                 'bf_add': BfAdd,
                 'bf_mov': BfMov,
@@ -26,6 +26,7 @@ class NameSpace:
                 "bf_read": BfRead,
                 "bf_cycle_op": BfCycleOp,
                 "bf_cycle_cl": BfCycleCl,
+                "reg": Reg
             }
 
     def get_func(self, token: Token) -> Type:
@@ -39,4 +40,7 @@ class NameSpace:
 
     def get_register_address(self, token: Token) -> int:
         return self.rs.get(token)
+
+    def create_register(self, token: Token):
+        self.rs.create(token)
 

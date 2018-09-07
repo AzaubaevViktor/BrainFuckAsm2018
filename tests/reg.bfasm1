@@ -1,0 +1,9 @@
+reg X
+bf_mov X :0
+bf_add 5
+bf_mov :0 X
+
+reg Y
+bf_mov Y :0
+bf_add 5
+bf_mov :0 Y

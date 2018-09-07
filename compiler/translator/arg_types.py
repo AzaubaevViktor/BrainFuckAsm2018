@@ -25,7 +25,7 @@ class TAddress(TType):
     def __init__(self, ns: NameSpace, token: Token):
         self.ns = ns
         self.token = token
-        self.addr = None
+        self.value = None
         self._check()
 
     def _check(self):
@@ -33,13 +33,13 @@ class TAddress(TType):
 
         try:
             if text.startswith(":"):
-                self.addr = int(text[1:])
+                self.value = int(text[1:])
                 return
         except ValueError:
             pass
 
         try:
-            self.addr = self.ns.get_register_address(self.token)
+            self.value = self.ns.get_register_address(self.token)
             return
         except CompileError:
             pass
@@ -47,3 +47,25 @@ class TAddress(TType):
         raise CompileError(
             "translator", self.token,
             f"`{self.token}` не является адресом. Правильный формат: `:<int>` или имя регистра")
+
+
+class TRegister(TType):
+    def __init__(self, ns: NameSpace, token: Token):
+        self.ns = ns
+        self.token = token
+        self.value = None
+        self._check()
+
+    def _check(self):
+        self.value = self.ns.get_register_address(self.token)
+
+
+class TString(TType):
+    def __init__(self, ns: NameSpace, token: Token):
+        self.ns = ns
+        self.token = token
+        self.value = None
+        self._check()
+
+    def _check(self):
+        self.value = self.token.text
