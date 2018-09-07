@@ -38,7 +38,11 @@ class Block(Line):
     def beauty_str(self, indent=None):
         indent = indent or self.level
         i = "    " * indent
-        s = f"{i}{self.func} {' '.join(map(str, self.args))}\n"
+        if self.level >= 0:
+            s = f"{i}{self.func} {' '.join(map(str, self.args))}\n"
+        else:
+            s = ""
+
         for block in self.inside:
             s += block.beauty_str(indent + 1)
         return s
