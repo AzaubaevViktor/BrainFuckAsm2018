@@ -20,7 +20,8 @@ class Token:
 
 
 class Line:
-    def __init__(self, line_number: int, data: str):
+    def __init__(self, file_path: str, line_number: int, data: str):
+        self.file_path = file_path
         self.n = line_number
         self.raw = data = data.rstrip()
 

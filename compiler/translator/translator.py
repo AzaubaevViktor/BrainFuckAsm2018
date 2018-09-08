@@ -1,9 +1,34 @@
+
+from os import path
 from typing import List, Type
 
-from ..lexer import Line
-from ..parser import Block
+from ..lexer import Line, Lexer
+from ..parser import Block, Parser
 from .namespace import NameSpace
 from .func import BuiltinFunction, BuiltinMacro, BuiltinBlock, GeneratedBlockFunction, Function
+
+
+def _get_filename(file_name_w_ext):
+    file_name = file_name_w_ext.split(".")
+    if len(file_name) == 1:
+        return file_name[0]
+    else:
+        return ".".join(file_name[:-1])
+
+
+class CompiledFile:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+        self.file_name = path.basename(file_path)[1]
+        f = self._finder(self.file_path)
+        self.raw_lines = f.readlines()
+        self.lines = Lexer(self.raw_lines, file_path).lines
+        self.root_block = Parser(self.lines).root
+        self.code = Translator(self.root_block).code
+        self.module_name = _get_filename(self.file_name)
+
+    def _finder(self, file_name):
+        return open(file_name, "rt")
 
 
 class Translator:
@@ -38,6 +63,3 @@ class Translator:
 
 
         return code
-
-
-

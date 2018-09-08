@@ -8,7 +8,7 @@ class Parser:
     def __init__(self, lexer_lines: List[Line]):
         self.lines = []
         self.cur_level = 0
-        self.root = Block(None, Line(-1, ""))
+        self.root = Block(None, Line("<FUCK>", -1, ""))
         self.root.level = -1
         block = self.root
         for line in lexer_lines:

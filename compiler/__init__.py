@@ -1,2 +1,2 @@
 from .error import CompileError
-from .compiler import Compiler
+from .translator import CompiledFile
