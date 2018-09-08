@@ -1,0 +1,6 @@
+macro add Addr address V num
+    bf_mov Addr :0
+    bf_add V
+    bf_mov :0 Addr
+
+add :3 5

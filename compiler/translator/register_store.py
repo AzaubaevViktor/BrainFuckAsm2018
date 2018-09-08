@@ -43,11 +43,12 @@ class RegisterStore:
 
         raise CompileError("translator", token, f"Register `{name}` not found!")
 
-    def create(self, token: Token):
+    def create(self, token: Token) -> int:
         name = token.text
         if name in self._last_frame:
             raise CompileError("translator", token, f"Register {name} already exist")
         self._last_frame[name] = self._free_cell()
+        return self._last_frame[name]
 
     def delete(self, token: Token):
         name = token.text

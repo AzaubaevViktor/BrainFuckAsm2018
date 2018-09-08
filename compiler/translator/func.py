@@ -1,14 +1,15 @@
-from typing import List, Tuple
+from collections import OrderedDict
+from typing import List, Tuple, Dict, Type
 
 from ..error import CompileError
-from ..lexer import Token
-from .arg_types import TType, TNum, TAddress, TString, TRegister
+from ..lexer import Token, Line
+from .var_types import VType, TNum, TAddress, TString, TRegister, ttypes, TType
 from .namespace import NameSpace
 
 
-class BuiltinFunction:
+class Function:
     NAME = ""
-    ARGS = []
+    ARGS = ()
 
     def __init__(self, ns: NameSpace, args: List[Token]):
         if not self.NAME:
@@ -16,21 +17,47 @@ class BuiltinFunction:
         self.ns = ns
         self.args = self._args_apply(args)
 
-    def _args_apply(self, args: List[Token]):
-        if len(args) != len(self.ARGS):
+    def _args_apply(self, args: List[Token], ARGS=None):
+        ARGS = ARGS or self.ARGS
+
+        if len(args) != len(ARGS):
             arg_err = args[-1] if args else None
             raise CompileError("translator", arg_err, "Argument count do not match")
 
-        ta: List[TType] = []
-        for Type, arg in zip(self.ARGS, args):
-            ta.append(Type(self.ns, arg))
+        ta: List[VType] = []
+        for Type, arg in zip(ARGS, args):
+            ta.append(Type(arg, ns=self.ns))
         return tuple(ta)
 
-    def _build(self, args: Tuple[TType, ...]):
+    def build(self, *args):
+        pass
+
+
+class BuiltinFunction(Function):
+    ARGS = []
+
+    def _build(self, args: Tuple[VType, ...]):
         raise NotImplementedError("Нужно заимплеменитровать!")
 
     def build(self):
         return self._build(self.args)
+
+
+class GeneratedBlockFunction(Function):
+    NAME = ""
+    ARGS = ()
+    CODE = []
+
+    def _args_apply(self, args: List[Token], ARGS=None):
+        ARGS = [a[1] for a in self.ARGS]
+        args = super()._args_apply(args, ARGS)
+        args = {name: result for (name, _) , result in zip(self.ARGS, args)}
+        return args
+
+
+
+class BuiltinBlock(Function):
+    pass
 
 
 class BfAdd(BuiltinFunction):
@@ -102,7 +129,7 @@ class Reg(BuiltinFunction):
 
     def _build(self, args: Tuple[TString]):
         token = args[0].token
-        self.ns.create_register(token)
+        self.ns.add(token, -1, register=True)
         return ""
 
 
@@ -112,10 +139,40 @@ class UnReg(BuiltinFunction):
 
     def _build(self, args: Tuple[TRegister]):
         token = args[0].token
-        self.ns.delete_register(token)
+        self.ns.delete(token)
         return ""
 
-"unreg"
+# Block function
+
+
+class BuiltinMacro(BuiltinBlock):
+    NAME = "macro"
+
+    def _args_apply(self, args: List[Token], ARGS=None):
+        if len(args) % 2 != 1:
+            arg_err = args[-1] if args else None
+            raise CompileError("translator", arg_err, "Argument count do not match (need 2n+1)")
+
+        func_name_token = TString(args[0])
+        func_args: Dict[str, Type[VType]] = OrderedDict()
+
+        for name, type_name in zip(args[1::2], args[2::2]):
+            _type = TType(type_name).value
+
+            func_args[name] = _type
+
+        self.func_name_tp = func_name_token
+        self.func_args = func_args
+
+    def build(self, lines: List[Line]):
+        class NewFunction(GeneratedBlockFunction):
+            NAME = self.func_name_tp.value
+            ARGS = tuple(self.func_args.items())
+
+            CODE = lines
+
+        self.ns.add(self.func_name_tp.token, NewFunction)
+        return ""
 
 "clear_frame"  # очистит текущий кадр стека
 

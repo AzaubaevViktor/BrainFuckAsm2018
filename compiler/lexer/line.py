@@ -1,10 +1,10 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 from compiler import CompileError
 
 
 class Token:
-    def __init__(self, line: "Line", pos: int, text: str):
+    def __init__(self, line: Union["Line", None], pos: Union[int, None], text: str):
         self.line = line
         self.pos = pos
         self.text = text
@@ -16,7 +16,7 @@ class Token:
         return self.text
 
     def __repr__(self):
-        return f"<Token {self.line.n}:{self.pos} `{self.text}`"
+        return f"<Token {self.line.n if self.line else '?'}:{self.pos or '?'} `{self.text}`"
 
 
 class Line:
