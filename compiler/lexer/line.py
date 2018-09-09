@@ -24,10 +24,11 @@ class Line:
         self.file_path = file_path
         self.n = line_number
         self.raw = data = data.rstrip()
+        self.level = -1
 
         spaces = len(data) - len(data.lstrip())
         if spaces % 4 != 0:
-            raise CompileError('lexer', self, "Количество пробелов не кратно 4м", pos=spaces - 1)
+            raise CompileError('lexer', self, "Количество пробелов не кратно 4м", pos=spaces)
 
         self.level = spaces // 4
 
@@ -47,7 +48,7 @@ class Line:
         return bool(self.func)
 
     def __str__(self):
-        return f"<Line#{self.n}[{self.level}], `{self.raw}`"
+        return f"<Line#{self.n}[->{self.level}], `{self.raw}`>"
 
     def __repr__(self):
         return str(self)

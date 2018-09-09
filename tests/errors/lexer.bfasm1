@@ -1,0 +1,8 @@
+nul
+ one
+  two
+   three
+    four
+
+
+#[error: lexer 2 1 ]

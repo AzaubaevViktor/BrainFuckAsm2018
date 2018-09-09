@@ -1,7 +1,7 @@
 import os
 from pprint import pprint
 
-from compiler import CompiledFile
+from compiler import CompiledFile, CompileError
 
 
 class Errors(dict):
@@ -26,7 +26,40 @@ if __name__ == "__main__":
                 continue
             print(f"============ {file_path} =============")
             file_path = os.path.join(root, file_path)
+
             c = CompiledFile(file_path)
+
+            try:
+                c.compile()
+            except CompileError as e:
+                if "error" in c.params:
+                    print("Ошибка перехвачена!")
+                    exc_level, line_n, pos = c.params["error"].split(' ')
+                    if e.line.n == int(line_n):
+                        err = f"Error[Error]: need: line number `{int(line_n)}`, but in fact:`{e.line.n}`"
+                        print(err)
+                        errors[file_path] = err
+                    if e.pos != int(pos):
+                        err = f"Error[Error]: need: pos `{pos}`, but in fact:`{e.pos}`"
+                        print(err)
+                        errors[file_path] = err
+                    if e.level != exc_level:
+                        err = f"Error[Error]: need: level `{exc_level}`, but in fact:`{e.level}`"
+                        print(err)
+                        errors[file_path] = err
+                else:
+                    err = f"Error[Error]: need: No error, but in fact:`{e}`"
+                    print(err)
+                    errors[file_path] = err
+
+                continue
+            except Exception as e:
+                err = f"Error[Error]: need: CompileError, but in fact:`{e}`"
+                print(err)
+                errors[file_path] = err
+
+                continue
+
             print(c.lines)
             print(c.root_block.beauty_str())
             print(c.code)
