@@ -33,10 +33,10 @@ class Line:
 
         data = data.strip()
 
+        #TODO: Check
         data, *self.comment = data.split("#")
-        self.comment = " ".join(self.comment)
-        if self.comment:
-            self.comment = self.comment[1:]
+        self.comment = "#".join(self.comment)
+        self.comment = self.comment.strip()
 
         args = self.tokenize(data)
 

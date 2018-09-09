@@ -4,3 +4,6 @@ macro add Addr address V num
     bf_mov :0 Addr
 
 add :3 5
+
+
+#[code: >>>+++++<<< ]

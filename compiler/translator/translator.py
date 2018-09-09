@@ -22,10 +22,24 @@ class CompiledFile:
         self.file_name = path.basename(file_path)[1]
         f = self._finder(self.file_path)
         self.raw_lines = f.readlines()
-        self.lines = Lexer(self.raw_lines, file_path).lines
+        lexer = Lexer(self.raw_lines, file_path)
+
+        self.lines = lexer.lines
+        self.params = self._find_params(lexer.comment_lines)
         self.root_block = Parser(self.lines).root
         self.code = Translator(self.root_block).code
         self.module_name = _get_filename(self.file_name)
+
+    def _find_params(self, lines):
+        params = {}
+        for line in lines:
+            cmt = line.comment
+            if cmt and cmt[0] == "[" and cmt[-1] == "]":
+                cmt = cmt[1:-1]
+                key, *value = cmt.split(":")
+                value = ":".join(value)
+                params[key.strip()] = value.strip()
+        return params
 
     def _finder(self, file_name):
         return open(file_name, "rt")
