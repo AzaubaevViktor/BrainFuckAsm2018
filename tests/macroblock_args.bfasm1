@@ -1,0 +1,10 @@
+macroblock do_at addr address
+    bf_mov addr :0
+    $do_at
+    bf_mov :0 addr
+
+
+do_at :2
+    bf_add -1
+
+#[code: >>-<< ]

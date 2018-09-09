@@ -39,7 +39,7 @@ class NameSpace:
     def _init_functions(self):
         if self.parent is None:
             from .func import BfAdd, BfMov, BfPrint, BfRead, BfCycleOp, BfCycleCl, Reg, UnReg, \
-                BuiltinMacro
+                BuiltinMacro, BuiltinMacroBlock
             self.objs.update({
                 'bf_add': BfAdd,
                 'bf_mov': BfMov,
@@ -49,7 +49,8 @@ class NameSpace:
                 "bf_cycle_cl": BfCycleCl,
                 "reg": Reg,
                 "unreg": UnReg,
-                "macro": BuiltinMacro
+                "macro": BuiltinMacro,
+                "macroblock": BuiltinMacroBlock
             })
 
     def get(self, token: Token, check=None):

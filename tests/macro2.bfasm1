@@ -1,0 +1,18 @@
+macro null addr address
+    bf_mov addr :0
+    bf_cycle_op
+    bf_add -1
+    bf_cycle_cl
+    bf_mov :0 addr
+
+macro add Addr address V num
+    bf_mov Addr :0
+    bf_add V
+    bf_mov :0 Addr
+
+
+null :1
+add :1 -5
+null :1
+
+#[code: >[-]<>-----<>[-]< ]

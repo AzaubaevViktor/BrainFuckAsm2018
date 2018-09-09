@@ -91,7 +91,17 @@ class TString(VType):
         self.value = self.token.text
 
 
-ttypes: List[Type[VType]] = [TNum, TAddress, TRegister, TString]
+class TName(VType):
+    NAME = "name"
+
+    def _check(self):
+        text = self.token.text
+        if not text[0].isalpha():
+            raise CompileError("translator", self.token, f"Имя должно начинаться с буквы, а не с `{text[0]}`")
+        self.value = text
+
+
+ttypes: List[Type[VType]] = [TNum, TAddress, TRegister, TString, TName]
 ttypes: Dict[str, Type[VType]] = {tt.NAME: tt for tt in ttypes}
 
 

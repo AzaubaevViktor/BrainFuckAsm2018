@@ -5,7 +5,8 @@ from typing import List, Type
 from ..lexer import Line, Lexer
 from ..parser import Block, Parser
 from .namespace import NameSpace
-from .func import BuiltinFunction, BuiltinMacro, BuiltinBlock, GeneratedBlockFunction, Function
+from .func import BuiltinFunction, BuiltinMacro, BuiltinBlock, GeneratedBlockFunction, Function, \
+    GeneratedMacroBlockFunction
 
 
 def _get_filename(file_name_w_ext):
@@ -73,6 +74,17 @@ class Translator:
             if isinstance(line, Block):
                 if isinstance(func, BuiltinBlock):
                     code += func.build(line.inside)
+                elif isinstance(func, GeneratedMacroBlockFunction):
+                    # добавить функции для очистки кадра стека
+                    child_ns = ns.create_child()
+                    for var_name, obj in func.args.items():
+                        child_ns.add(var_name, obj)
+
+                    func.build(line.inside)
+
+                    code += self._compile(child_ns, func.CODE)
+                    # переместить результат выполнения функции в текущий ns
+                    child_ns.delete_regs()
 
 
 

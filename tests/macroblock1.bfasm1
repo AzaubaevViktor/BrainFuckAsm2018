@@ -1,0 +1,10 @@
+macroblock cycle
+    bf_cycle_op
+    $cycle
+    bf_cycle_cl
+
+
+cycle
+    bf_add 1
+
+#[code: [+] ]

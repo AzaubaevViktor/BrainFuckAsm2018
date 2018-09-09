@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict, Type
 
 from ..error import CompileError
 from ..lexer import Token, Line
-from .var_types import VType, TNum, TAddress, TString, TRegister, ttypes, TType
+from .var_types import VType, TNum, TAddress, TString, TRegister, ttypes, TType, TName
 from .namespace import NameSpace
 
 
@@ -43,17 +43,34 @@ class BuiltinFunction(Function):
         return self._build(self.args)
 
 
-class GeneratedBlockFunction(Function):
-    NAME = ""
-    ARGS = ()
-    CODE = []
-
+class _GenBlockF(Function):
     def _args_apply(self, args: List[Token], ARGS=None):
         ARGS = [a[1] for a in self.ARGS]
         args = super()._args_apply(args, ARGS)
         args = {name: result for (name, _) , result in zip(self.ARGS, args)}
         return args
 
+
+class GeneratedBlockFunction(_GenBlockF):
+    NAME = ""
+    ARGS = ()
+    CODE = []
+
+
+class GeneratedMacroBlockFunction(_GenBlockF):
+    NAME = ""
+    ARGS = ()
+    CODE = []
+
+    def build(self, line_inside: List[Line]):
+        class DOLLAR_NewFunc(GeneratedBlockFunction):
+            NAME = f"${self.NAME}"
+            ARGS = ()
+            CODE = line_inside
+
+        DOLLAR_NewFunc.__name__ = f"GeneratedDollar${DOLLAR_NewFunc.NAME}Function"
+
+        self.ns.add(Token(None, None, f"{DOLLAR_NewFunc.NAME}"), DOLLAR_NewFunc)
 
 
 class BuiltinBlock(Function):
@@ -125,9 +142,9 @@ class BfCycleCl(BuiltinFunction):
 
 class Reg(BuiltinFunction):
     NAME = "reg"
-    ARGS = (TString, )
+    ARGS = (TName, )
 
-    def _build(self, args: Tuple[TString]):
+    def _build(self, args: Tuple[TName]):
         token = args[0].token
         self.ns.add(token, -1, register=True)
         return ""
@@ -145,15 +162,13 @@ class UnReg(BuiltinFunction):
 # Block function
 
 
-class BuiltinMacro(BuiltinBlock):
-    NAME = "macro"
-
+class MultiArgFunction(BuiltinBlock):
     def _args_apply(self, args: List[Token], ARGS=None):
         if len(args) % 2 != 1:
             arg_err = args[-1] if args else None
             raise CompileError("translator", arg_err, "Argument count do not match (need 2n+1)")
 
-        func_name_token = TString(args[0])
+        func_name_token = TName(args[0])
         func_args: Dict[str, Type[VType]] = OrderedDict()
 
         for name, type_name in zip(args[1::2], args[2::2]):
@@ -164,6 +179,10 @@ class BuiltinMacro(BuiltinBlock):
         self.func_name_tp = func_name_token
         self.func_args = func_args
 
+
+class BuiltinMacro(MultiArgFunction):
+    NAME = "macro"
+
     def build(self, lines: List[Line]):
         class NewFunction(GeneratedBlockFunction):
             NAME = self.func_name_tp.value
@@ -171,12 +190,31 @@ class BuiltinMacro(BuiltinBlock):
 
             CODE = lines
 
+        NewFunction.__name__ = f"Generated{NewFunction.NAME}Function"
+
         self.ns.add(self.func_name_tp.token, NewFunction)
         return ""
 
+
+class BuiltinMacroBlock(MultiArgFunction):
+    NAME = "macroblock"
+
+    def build(self, lines: List[Line]):
+        class NewFunction(GeneratedMacroBlockFunction):
+            NAME = self.func_name_tp.value
+            ARGS = tuple(self.func_args.items())
+
+            CODE = lines
+
+        NewFunction.__name__ = f"Generated{NewFunction.NAME}BlockFunction"
+
+        self.ns.add(self.func_name_tp.token, NewFunction)
+
+        return ""
+
+
 "clear_frame"  # очистит текущий кадр стека
 
-"macro"
 "macroblock"
 "reg_macro"  # регистрирует переменную с уникальным именем
 "include"  # подключает файл
