@@ -23,7 +23,7 @@ errors = Errors()
 if __name__ == "__main__":
     for root, subdirs, files in os.walk('./tests'):
         for file_path in files:
-            if ".bfasm1" != file_path[-7:]:
+            if ".br" != file_path[-3:]:
                 continue
             print(f"============ {file_path} =============")
             file_path = os.path.join(root, file_path)

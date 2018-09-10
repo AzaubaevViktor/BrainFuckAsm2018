@@ -1,0 +1,10 @@
+macroblock cycle
+    bf_cycle_op
+    $cycle
+    bf_cycle_cl
+
+macro null reg address
+    bf_mov reg :0
+    cycle
+        bf_add 1
+    bf_mov :0 reg
