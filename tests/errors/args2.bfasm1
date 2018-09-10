@@ -1,0 +1,8 @@
+macro test addr address
+    bf_mov addr :0
+    bf_mov :0 addr
+
+test :4
+test 9
+
+#[error: translator 6 5 ]

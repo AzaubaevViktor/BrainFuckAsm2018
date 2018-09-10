@@ -8,7 +8,7 @@ class Lexer:
         self.lines: List[Line] = []
         self.comment_lines = []
         for n, line in enumerate(lines):
-            line = Line(file_path, n, line)
+            line = Line(file_path, n + 1, line)
             if line:
                 self.lines.append(line)
             else:

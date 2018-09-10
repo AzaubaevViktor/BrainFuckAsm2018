@@ -1,4 +1,5 @@
 import os
+import sys
 from pprint import pprint
 
 from compiler import CompiledFile, CompileError
@@ -35,7 +36,8 @@ if __name__ == "__main__":
                 if "error" in c.params:
                     print("Ошибка перехвачена!")
                     exc_level, line_n, pos = c.params["error"].split(' ')
-                    if e.line.n == int(line_n):
+                    err = None
+                    if e.line.n != int(line_n):
                         err = f"Error[Error]: need: line number `{int(line_n)}`, but in fact:`{e.line.n}`"
                         print(err)
                         errors[file_path] = err
@@ -51,6 +53,8 @@ if __name__ == "__main__":
                     err = f"Error[Error]: need: No error, but in fact:`{e}`"
                     print(err)
                     errors[file_path] = err
+
+                print(e, file=sys.stderr if err else sys.stdout)
 
                 continue
             except Exception as e:

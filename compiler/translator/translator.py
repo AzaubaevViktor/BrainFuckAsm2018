@@ -2,6 +2,7 @@
 from os import path
 from typing import List, Type
 
+from ..error import CompileError
 from ..lexer import Line, Lexer
 from ..parser import Block, Parser
 from .namespace import NameSpace
@@ -75,7 +76,11 @@ class Translator:
                     for var_name, obj in func.args.items():
                         child_ns.add(var_name, obj)
 
-                    code += self._compile(child_ns, func.CODE)
+                    try:
+                        code += self._compile(child_ns, func.CODE)
+                    except CompileError as e:
+                        e.add_to_stacktrace(line)
+                        raise e
                     # переместить результат выполнения функции в текущий ns
                     child_ns.delete_regs()
             if isinstance(line, Block):
@@ -88,8 +93,12 @@ class Translator:
                         child_ns.add(var_name, obj)
 
                     func.build(line.inside)
+                    try:
+                        code += self._compile(child_ns, func.CODE)
+                    except CompileError as e:
+                        e.add_to_stacktrace(line)
+                        raise e
 
-                    code += self._compile(child_ns, func.CODE)
                     # переместить результат выполнения функции в текущий ns
                     child_ns.delete_regs()
 

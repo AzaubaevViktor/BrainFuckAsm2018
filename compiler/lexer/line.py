@@ -32,8 +32,6 @@ class Line:
 
         self.level = spaces // 4
 
-        data = data.strip()
-
         #TODO: Check
         data, *self.comment = data.split("#")
         self.comment = "#".join(self.comment)
