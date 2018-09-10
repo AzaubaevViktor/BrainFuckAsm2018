@@ -20,9 +20,10 @@ class Function:
     def _args_apply(self, args: List[Token], ARGS=None):
         ARGS = ARGS or self.ARGS
 
-        if len(args) != len(ARGS):
-            arg_err = args[-1] if args else None
-            raise CompileError("translator", arg_err, "Argument count do not match")
+        if len(args) > len(ARGS):
+            raise CompileError("translator", args[len(ARGS)], "Too many arguments")
+        elif len(args) < len(ARGS):
+            raise CompileError("translator", None, f"`{ARGS[len(args)].NAME}` variable expected, `None` in fact")
 
         ta: List[VType] = []
         for Type, arg in zip(ARGS, args):
@@ -214,7 +215,5 @@ class BuiltinMacroBlock(MultiArgFunction):
 
 
 "clear_frame"  # очистит текущий кадр стека
-
-"macroblock"
-"reg_macro"  # регистрирует переменную с уникальным именем
+"global"  # Достаёт переменную из уровня ниже (и переименовывает её)
 "include"  # подключает файл

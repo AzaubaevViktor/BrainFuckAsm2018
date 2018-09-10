@@ -41,6 +41,7 @@ class Line:
 
         self.func: Token = args[0] if args else None
         self.args: List[Token] = args[1:]
+        self.end = Token(self, len(self.raw), "<END>")
 
     def __bool__(self):
         return bool(self.func)

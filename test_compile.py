@@ -57,12 +57,6 @@ if __name__ == "__main__":
                 print(e, file=sys.stderr if err else sys.stdout)
 
                 continue
-            except Exception as e:
-                err = f"Error[Error]: need: CompileError, but in fact:`{e}`"
-                print(err)
-                errors[file_path] = err
-
-                continue
 
             print(c.lines)
             print(c.root_block.beauty_str())

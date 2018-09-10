@@ -65,7 +65,13 @@ class Translator:
         code = ""
         for line in lines:
             Func: Type[BuiltinFunction] = ns.get(line.func, Function)
-            func = Func(ns, line.args)
+            try:
+                func = Func(ns, line.args)
+            except CompileError as e:
+                if e.token is None:
+                    e.pop()
+                    e.add_to_stacktrace(line.end)
+                raise e
 
             if isinstance(line, Line):
                 if isinstance(func, BuiltinFunction):

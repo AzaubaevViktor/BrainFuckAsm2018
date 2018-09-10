@@ -3,10 +3,12 @@ class CompileError(Exception):
         self.stacktrace = []
 
         self.level = level
+        self.line = None
+        self.token = None
+        self.pos = None
 
         self.add_to_stacktrace(line_or_token, pos)
         self.msg = msg
-        self.line, self.token, self.pos = self.stacktrace[0]
 
     def add_to_stacktrace(self, line_or_token, pos=None):
         line = None
@@ -21,9 +23,15 @@ class CompileError(Exception):
             line = token.line
             pos = token.pos
 
+        if not self.stacktrace:
+            self.line, self.token, self.pos = line, token, pos
+
         self.stacktrace.append([
             line, token, pos
         ])
+
+    def pop(self):
+        return self.stacktrace.pop()
 
     def __str__(self):
         s = f"Compilation Error on level `{self.level}`:"

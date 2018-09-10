@@ -31,6 +31,10 @@ class Block(Line):
     def args(self):
         return self.line.args
 
+    @property
+    def end(self):
+        return self.line.end
+
     @level.setter
     def level(self, value):
         self.line.level = value

@@ -1,0 +1,15 @@
+macroblock cycle
+    bf_cycle_op
+    $cycle
+    bf_cycle_cl
+
+macroblock do addr address
+    bf_mov addr :0
+    cycle
+        $do
+    bf_mov :0 addr
+
+do :3
+    bf_add 5
+
+#[code: >>>[+++++]<<< ]
