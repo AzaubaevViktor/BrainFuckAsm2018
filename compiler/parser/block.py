@@ -35,6 +35,18 @@ class Block(Line):
     def end(self):
         return self.line.end
 
+    @property
+    def file_path(self):
+        return self.line.file_path
+
+    @property
+    def n(self):
+        return self.line.n
+
+    @property
+    def raw(self):
+        return self.line.raw
+
     @level.setter
     def level(self, value):
         self.line.level = value

@@ -10,6 +10,7 @@ from .namespace import NameSpace
 class Function:
     NAME = ""
     ARGS = ()
+    LINKED_NAMESPACE = None
 
     def __init__(self, ns: NameSpace, args: List[Token]):
         if not self.NAME:
@@ -76,6 +77,15 @@ class GeneratedMacroBlockFunction(_GenBlockF):
 
 class BuiltinBlock(Function):
     pass
+
+
+
+class BfRaw(BuiltinFunction):
+    NAME = "bf_raw"
+    ARGS = (TString)
+
+    def _build(self, args: Tuple[TString]):
+        return args[0].value
 
 
 class BfAdd(BuiltinFunction):
@@ -190,6 +200,7 @@ class BuiltinMacro(MultiArgFunction):
             ARGS = tuple(self.func_args.items())
 
             CODE = lines
+            LINKED_NAMESPACE = self.ns
 
         NewFunction.__name__ = f"Generated{NewFunction.NAME}Function"
 
@@ -206,6 +217,7 @@ class BuiltinMacroBlock(MultiArgFunction):
             ARGS = tuple(self.func_args.items())
 
             CODE = lines
+            LINKED_NAMESPACE = self.ns
 
         NewFunction.__name__ = f"Generated{NewFunction.NAME}BlockFunction"
 
@@ -214,6 +226,20 @@ class BuiltinMacroBlock(MultiArgFunction):
         return ""
 
 
+class BuiltinInclude(BuiltinFunction):
+    NAME = "include"
+    ARGS = (TString, )
+
+    def _build(self, args: Tuple[TString]):
+        module_name = args[0].token
+
+        from compiler import CompiledFile
+        cf = CompiledFile(module_name)
+        cf.compile()
+        self.ns.add_module(module_name, cf.ns)
+        return cf.code
+
+
+"return"  # возвращает значие вниз по стеку
 "clear_frame"  # очистит текущий кадр стека
 "global"  # Достаёт переменную из уровня ниже (и переименовывает её)
-"include"  # подключает файл

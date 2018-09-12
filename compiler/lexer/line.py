@@ -1,4 +1,4 @@
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Iterable
 
 from compiler import CompileError
 
@@ -8,6 +8,13 @@ class Token:
         self.line = line
         self.pos = pos
         self.text = text
+
+    def split(self, sym: str) -> Iterable["Token"]:
+        pos = self.pos
+        for text in self.text.split(sym):
+            yield Token(self.line, pos, text)
+            pos += len(text)
+            pos += len(sym)
 
     def __int__(self):
         return int(self.text)

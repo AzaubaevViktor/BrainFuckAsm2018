@@ -13,6 +13,7 @@ class NameSpace:
         self.rs = RegisterStore() if parent is None else parent.rs
 
         self.objs = {}
+        self.modules: Dict[str, "NameSpace"] = {}
 
         self.rs.create_frame(self.STACK_FRAME)
         self._init_registers()
@@ -39,7 +40,7 @@ class NameSpace:
     def _init_functions(self):
         if self.parent is None:
             from .func import BfAdd, BfMov, BfPrint, BfRead, BfCycleOp, BfCycleCl, Reg, UnReg, \
-                BuiltinMacro, BuiltinMacroBlock
+                BuiltinMacro, BuiltinMacroBlock, BuiltinInclude
             self.objs.update({
                 'bf_add': BfAdd,
                 'bf_mov': BfMov,
@@ -50,17 +51,26 @@ class NameSpace:
                 "reg": Reg,
                 "unreg": UnReg,
                 "macro": BuiltinMacro,
-                "macroblock": BuiltinMacroBlock
+                "macroblock": BuiltinMacroBlock,
+                "include": BuiltinInclude
             })
 
     def get(self, token: Token, check=None):
+        check_name = (check.__name__ if check else None) or 'Object'
         obj_name = token.text
-        if obj_name in self.objs:
-            obj = self.objs[obj_name]
-        elif self.parent:
-            obj = self.parent.get(token)
+        if "." in obj_name:
+            module, obj_name = token.split(".")
+            if module.text in self.modules:
+                obj = self.modules[module.text].get(obj_name, check)
+            else:
+                obj = None
         else:
-            raise CompileError("translator", token, f"{check or 'Object'} {token} not found in namespace")
+            if obj_name in self.objs:
+                obj = self.objs[obj_name]
+            elif self.parent:
+                obj = self.parent.get(token)
+            else:
+                raise CompileError("translator", token, f"{check_name} `{token}` not found in namespace")
 
         if check:
             if isinstance(obj, check):
@@ -72,7 +82,7 @@ class NameSpace:
 
             raise CompileError(
                 "translator", token,
-                f"{token} found, but it is not {check}, but {type(obj)}")
+                f"`{token}` found, but it is {type(obj)}, not `{check_name}` ")
 
         return obj
 
@@ -99,26 +109,10 @@ class NameSpace:
 
         del self.objs[token.text]
 
-    def _add_func(self, func: "Function"):
-        self.add(func.NAME, func)
-
-    def _get_func(self, token: Token) -> Type:
-        if token.text not in self.functions:
-            if self.parent:
-                return self.parent.get_func(token)
-            else:
-                raise CompileError("translator", token, f"Function {token} not found")
-        else:
-            return self.functions[token.text]
-
-    def _get_register_address(self, token: Token) -> int:
-        return self.rs.get(token)
-
-    def _create_register(self, token: Token):
-        self.rs.create(token)
-
-    def _delete_register(self, token: Token):
-        self.rs.delete(token)
-
     def create_child(self):
         return NameSpace(self)
+
+    def add_module(self, name: Token, ns: "NameSpace"):
+        if name in self.modules:
+            raise CompileError("translator", name, f"Module `{name}` already exist")
+        self.modules[name.text] = ns

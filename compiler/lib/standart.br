@@ -8,3 +8,6 @@ macro null reg address
     cycle
         bf_add 1
     bf_mov :0 reg
+
+bf_add 100
+bf_print

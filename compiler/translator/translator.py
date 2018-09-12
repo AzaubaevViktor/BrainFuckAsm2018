@@ -1,6 +1,6 @@
 
 from os import path
-from typing import List, Type
+from typing import List, Type, Union
 
 from ..error import CompileError
 from ..lexer import Line, Lexer
@@ -19,20 +19,27 @@ def _get_filename(file_name_w_ext):
 
 
 class CompiledFile:
-    def __init__(self, file_path: str):
-        self.file_path = file_path
+    def __init__(self, file_path: Union[str, "Token"]):
+        from ..lexer import Token
+        self.token = None
+        if isinstance(file_path, Token):
+            self.token = file_path
+            file_path = file_path.text
+        self.filepath = file_path
         self.file_name = path.basename(file_path)[1]
-        f = self._finder(self.file_path)
+        f = self._finder()
         self.raw_lines = f.readlines()
         f.close()
         self.params = self._find_params(self.raw_lines)
 
     def compile(self):
-        lexer = Lexer(self.raw_lines, self.file_path)
+        lexer = Lexer(self.raw_lines, self.filepath)
 
         self.lines = lexer.lines
         self.root_block = Parser(self.lines).root
-        self.code = Translator(self.root_block).code
+        translator = Translator(self.root_block)
+        self.code = translator.code
+        self.ns = translator.ns_root
         self.module_name = _get_filename(self.file_name)
 
     def _find_params(self, lines):
@@ -50,8 +57,12 @@ class CompiledFile:
                 params[key.strip()] = value.strip()
         return params
 
-    def _finder(self, file_name):
-        return open(file_name, "rt")
+    def _finder(self):
+        if self.token:
+            # find in lib
+            self.filepath = path.join("./compiler/lib", self.token.text + ".br")
+
+        return open(self.filepath, "rt")
 
 
 class Translator:
