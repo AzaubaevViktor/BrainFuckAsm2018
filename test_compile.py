@@ -61,7 +61,8 @@ if __name__ == "__main__":
             print(c.lines)
             print(c.root_block.beauty_str())
             print(c.code)
-            if "code" in c.params:
+            # if "code" in c.params:
+            if False:
                 print("Check code... ", end="")
 
                 if c.code != c.params["code"]:

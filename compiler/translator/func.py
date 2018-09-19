@@ -8,6 +8,7 @@ from .namespace import NameSpace
 
 
 class Function:
+    """Базовая функция"""
     NAME = ""
     ARGS = ()
     LINKED_NAMESPACE = None
@@ -36,13 +37,24 @@ class Function:
 
 
 class BuiltinFunction(Function):
+    """Встроенна функция"""
     ARGS = []
 
     def _build(self, args: Tuple[VType, ...]):
         raise NotImplementedError("Нужно заимплеменитровать!")
 
-    def build(self):
-        return self._build(self.args)
+    def build(self) -> List[Function]:
+        _r = self._build(self.args)
+        if _r is None:
+            return []
+
+        if isinstance(_r, str):
+            return [BfRaw(self.ns, [Token(None, None, _r)])]
+
+        if not isinstance(_r, list):
+            raise ValueError(_r, "Not list!")
+
+        return _r
 
 
 class _GenBlockF(Function):
@@ -75,7 +87,7 @@ class GeneratedMacroBlockFunction(_GenBlockF):
         self.ns.add(Token(None, None, f"{DOLLAR_NewFunc.NAME}"), DOLLAR_NewFunc)
 
 
-class BuiltinBlock(Function):
+class BuiltinBlockFunction(Function):
     pass
 
 
@@ -96,11 +108,11 @@ class BfAdd(BuiltinFunction):
         num: TNum = args[0]
 
         if num.value > 0:
-            return "+" * num.value
+            return self.ns, "+" * num.value
         elif num.value < 0:
-            return "-" * -num.value
+            return self.ns, "-" * -num.value
         else:
-            return ""
+            return None
 
 
 class BfMov(BuiltinFunction):
@@ -173,7 +185,7 @@ class UnReg(BuiltinFunction):
 # Block function
 
 
-class MultiArgFunction(BuiltinBlock):
+class MultiArgFunction(BuiltinBlockFunction):
     def _args_apply(self, args: List[Token], ARGS=None):
         if len(args) % 2 != 1:
             arg_err = args[-1] if args else None
@@ -191,7 +203,7 @@ class MultiArgFunction(BuiltinBlock):
         self.func_args = func_args
 
 
-class BuiltinMacro(MultiArgFunction):
+class Macro(MultiArgFunction):
     NAME = "macro"
 
     def build(self, lines: List[Line]):
@@ -208,7 +220,7 @@ class BuiltinMacro(MultiArgFunction):
         return ""
 
 
-class BuiltinMacroBlock(MultiArgFunction):
+class MacroBlock(MultiArgFunction):
     NAME = "macroblock"
 
     def build(self, lines: List[Line]):
@@ -226,7 +238,7 @@ class BuiltinMacroBlock(MultiArgFunction):
         return ""
 
 
-class BuiltinInclude(BuiltinFunction):
+class Include(BuiltinFunction):
     NAME = "include"
     ARGS = (TString, )
 

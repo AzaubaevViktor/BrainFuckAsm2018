@@ -6,8 +6,8 @@ from ..error import CompileError
 from ..lexer import Line, Lexer
 from ..parser import Block, Parser
 from .namespace import NameSpace
-from .func import BuiltinFunction, BuiltinMacro, BuiltinBlock, GeneratedBlockFunction, Function, \
-    GeneratedMacroBlockFunction
+from .func import BuiltinFunction, Macro, BuiltinBlockFunction, GeneratedBlockFunction, Function, \
+    GeneratedMacroBlockFunction, BfRaw
 
 
 def _get_filename(file_name_w_ext):
@@ -69,13 +69,13 @@ class Translator:
     def __init__(self, root_block: Block):
         self.root = root_block
         self.ns_root = NameSpace(None)
-        self.code = self._compile(self.ns_root, self.root.inside)
+        self.code: List[Function] = self._compile(self.ns_root, self.root.inside)
 
-    def _compile(self, namespace: NameSpace, lines: List[Line]):
+    def _compile(self, namespace: NameSpace, lines: List[Line]) -> List[Function]:
         ns = namespace
-        code = ""
+        code = []
         for line in lines:
-            Func: Type[BuiltinFunction] = ns.get(line.func, Function)
+            Func: Type[Function] = ns.get(line.func, Function)
             try:
                 func = Func(ns, line.args)
             except CompileError as e:
@@ -87,6 +87,7 @@ class Translator:
             if isinstance(line, Line):
                 if isinstance(func, BuiltinFunction):
                     code += func.build()
+
                 elif isinstance(func, GeneratedBlockFunction):
                     # добавить функции для очистки кадра стека
                     child_ns = ns.create_child()
@@ -101,7 +102,7 @@ class Translator:
                     # переместить результат выполнения функции в текущий ns
                     child_ns.delete_regs()
             if isinstance(line, Block):
-                if isinstance(func, BuiltinBlock):
+                if isinstance(func, BuiltinBlockFunction):
                     code += func.build(line.inside)
                 elif isinstance(func, GeneratedMacroBlockFunction):
                     # добавить функции для очистки кадра стека
